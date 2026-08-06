@@ -1,0 +1,8 @@
+{
+  "name": "Cristal Master - Almoxarifado",
+  "short_name": "Almox",
+  "start_url": "/operador",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1976D2"
+}

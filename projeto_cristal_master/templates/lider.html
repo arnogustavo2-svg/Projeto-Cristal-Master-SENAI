@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <title>Painel do Líder - Cristal Master</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Painel de Controle Logístico</h1>
+    </header>
+
+    <main>
+        <div id="notificacoes-criticas" role="alert" aria-live="polite"></div>
+
+        <!-- Filtro de período -->
+        <section id="filtro-periodo">
+            <form method="get" action="{{ url_for('lider') }}" class="form-filtro">
+                <div class="campo-data">
+                    <label for="data_inicio">Data Início:</label>
+                    <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                </div>
+                <div class="campo-data">
+                    <label for="data_fim">Data Fim:</label>
+                    <input type="date" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                </div>
+                <button type="submit">Filtrar</button>
+            </form>
+        </section>
+
+        <!-- KPIs -->
+        <section id="kpi-section">
+            <h2>Indicadores do Período</h2>
+            <div class="kpi-cards">
+                <article class="kpi-card" id="kpi-kg">
+                    <h3>Total Movimentado</h3>
+                    <p class="kpi-value">{{ "%.2f"|format(total_kg) }} kg</p>
+                </article>
+                <article class="kpi-card" id="kpi-baixas">
+                    <h3>Total de Baixas</h3>
+                    <p class="kpi-value">{{ total_baixas }}</p>
+                </article>
+                <article class="kpi-card" id="kpi-bloqueios">
+                    <h3>Bloqueios FIFO</h3>
+                    <p class="kpi-value">{{ total_bloqueios }}</p>
+                </article>
+                <article class="kpi-card" id="kpi-ops">
+                    <h3>OPs Ativas</h3>
+                    <p class="kpi-value">{{ total_ops_ativas }}</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Módulo ERP Central – Alerta de Estoque de Segurança -->
+        <section id="modulo-erp-central-seguranca">
+            <h2>Módulo ERP Central: Alerta de Estoque de Segurança</h2>
+            {% if materiais_criticos %}
+            <table class="tabela-seguranca" id="tabela-seguranca">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Saldo Real (kg)</th>
+                        <th>Estoque de Segurança (kg)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mat in materiais_criticos %}
+                    <tr>
+                        <td>{{ mat.codigo_material }}</td>
+                        <td>{{ mat.descricao }}</td>
+                        <td>{{ "%.2f"|format(mat.saldo_real_kg) }}</td>
+                        <td>{{ "%.2f"|format(mat.estoque_seguranca_kg) }}</td>
+                        <td class="status-critico">CRÍTICO</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>Nenhum material abaixo do estoque de segurança.</p>
+            {% endif %}
+        </section>
+
+        <!-- Gráficos -->
+        <section id="graficos-section">
+            <h2>Análise Visual</h2>
+            <div class="graficos-container">
+                <div class="grafico" id="grafico-volume">
+                    <h3>Volume Diário de Baixas (kg)</h3>
+                    <canvas id="graficoVolume"></canvas>
+                </div>
+                <div class="grafico" id="grafico-status">
+                    <h3>Status das Ordens de Produção</h3>
+                    <canvas id="graficoStatus"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabelas detalhadas -->
+        <section id="painel-ops">
+            <h2>Ordens de Produção</h2>
+            <table class="tabela-ops" id="tabela-ops">
+                <thead><tr><th>OP</th><th>Extrusora</th><th>Material</th><th>Total (kg)</th><th>Entregue (kg)</th><th>Saldo (kg)</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for op in ops %}
+                    <tr>
+                        <td>{{ op.numero_op }}</td><td>{{ op.extrusora }}</td><td>{{ op.descricao_material }}</td>
+                        <td>{{ op.qtd_total_kg }}</td><td>{{ op.qtd_entregue_kg }}</td><td>{{ op.saldo_devedor_kg }}</td><td>{{ op.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section id="painel-linhas">
+            <h2>Linhas Duplas de Piso</h2>
+            <table class="tabela-linhas" id="tabela-linhas">
+                <thead><tr><th>Nome</th><th>Modo</th><th>Status</th><th>Lote Atual</th><th>Pallets Restantes</th></tr></thead>
+                <tbody>
+                    {% for linha in linhas %}
+                    <tr>
+                        <td>{{ linha.nome_linha }}</td><td>{{ linha.modo }}</td><td>{{ linha.status }}</td>
+                        <td>{{ linha.lote_atual }}</td><td>{{ linha.pallets_restantes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section id="painel-historico">
+            <h2>Histórico de Baixas (período)</h2>
+            <table class="tabela-historico" id="tabela-historico">
+                <thead><tr><th>Data/Hora</th><th>OP</th><th>Pallet</th><th>Qtd (kg)</th><th>Matrícula</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for h in historicos %}
+                    <tr>
+                        <td>{{ h.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ h.ordem.numero_op }}</td><td>{{ h.codigo_pallet_bipado }}</td>
+                        <td>{{ h.qtd_baixada_kg }}</td><td>{{ h.operador_matricula }}</td><td>{{ h.status_sync }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section id="painel-bloqueios">
+            <h2>Bloqueios FIFO (período)</h2>
+            <table class="tabela-bloqueios" id="tabela-bloqueios">
+                <thead><tr><th>Data/Hora</th><th>OP</th><th>Motivo</th><th>Foto</th><th>Matrícula</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for b in bloqueios %}
+                    <tr>
+                        <td>{{ b.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ b.ordem.numero_op }}</td><td>{{ b.motivo }}</td>
+                        <td><a href="{{ url_for('uploaded_file', filename=b.foto_path) }}" target="_blank">Ver foto</a></td>
+                        <td>{{ b.operador_matricula }}</td><td>{{ b.status_analise }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Cristal Master - Almoxarifado</p>
+    </footer>
+
+    <!-- Gráficos Chart.js -->
+    <script>
+        const volumeLabels = {{ grafico_volume_labels | tojson }};
+        const volumeData = {{ grafico_volume_data | tojson }};
+        const statusLabels = {{ grafico_status_labels | tojson }};
+        const statusData = {{ grafico_status_data | tojson }};
+
+        const ctxVolume = document.getElementById('graficoVolume').getContext('2d');
+        new Chart(ctxVolume, { type: 'line', data: { labels: volumeLabels, datasets: [{ label: 'Kg movimentados', data: volumeData, borderColor: '#1E88E5', backgroundColor: 'rgba(30,136,229,0.1)', borderWidth: 2, tension: 0.2, fill: true }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Kg' } }, x: { title: { display: true, text: 'Data' } } } } });
+
+        const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
+        new Chart(ctxStatus, { type: 'doughnut', data: { labels: statusLabels, datasets: [{ data: statusData, backgroundColor: ['#43A047', '#E53935'], borderColor: '#ffffff', borderWidth: 2 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+    </script>
+
+    <!-- Socket.IO – atualização reativa dos KPIs e alertas críticos -->
+    <script>
+        const socket = io();
+
+        socket.on('atualizacao_dados', function (data) {
+            document.querySelector('#kpi-kg .kpi-value').innerText = data.total_kg.toFixed(2) + ' kg';
+            document.querySelector('#kpi-baixas .kpi-value').innerText = data.total_baixas;
+            document.querySelector('#kpi-ops .kpi-value').innerText = data.ops_ativas;
+        });
+
+        function exibirNotificacao(texto) {
+            const container = document.getElementById('notificacoes-criticas');
+            const p = document.createElement('p');
+            p.textContent = texto;
+            container.prepend(p);
+        }
+
+        socket.on('alerta_estoque_seguranca', function (data) {
+            exibirNotificacao(`Estoque crítico: ${data.codigo_material} (${data.descricao}) em ${data.saldo_real_kg} kg — abaixo da segurança de ${data.estoque_seguranca_kg} kg.`);
+        });
+
+        socket.on('alerta_sem_linha_consumo', function (data) {
+            exibirNotificacao(`ALERTA CRÍTICO: linha "${data.linha_esgotada}" esgotou pallets e não há linha de reposição disponível. Intervenção manual necessária.`);
+        });
+    </script>
+
+    <script>
+        // Registro do Service Worker (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+                    .catch(err => console.error('Falha no registro do Service Worker', err));
+            });
+        }
+    </script>
+</body>
+</html>

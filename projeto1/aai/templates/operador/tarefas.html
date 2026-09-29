@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Minhas Tarefas{% endblock %}
+{% block body %}
+<main class="container">
+    <section class="panel">
+        <h1>Minhas tarefas</h1>
+        <h2>Atribuídas a mim</h2>
+        <table class="tabela">
+            <thead><tr><th>ID</th><th>OP</th><th>Função</th><th>Material</th><th>Qtd</th><th>Prioridade</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tabela-minhas"></tbody>
+        </table>
+        <h2>Disponíveis</h2>
+        <table class="tabela">
+            <thead><tr><th>ID</th><th>OP</th><th>Função</th><th>Material</th><th>Qtd</th><th>Prioridade</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tabela-disponiveis"></tbody>
+        </table>
+        <p class="message" id="msg-tarefas"></p>
+    </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/operador.js') }}"></script>{% endblock %}

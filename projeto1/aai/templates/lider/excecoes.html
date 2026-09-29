@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Exceções — Líder{% endblock %}
+{% block body %}
+<div class="leader-layout">
+    {% include "lider/_sidebar.html" %}
+    <main class="content">
+        <h1>Exceções</h1>
+        <button class="button" id="refresh-excecoes">Atualizar</button>
+        <table class="tabela">
+            <thead><tr><th>ID</th><th>Operador</th><th>OP</th><th>Tarefa</th><th>Motivo</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tabela-excecoes"></tbody>
+        </table>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lider.js') }}"></script>{% endblock %}

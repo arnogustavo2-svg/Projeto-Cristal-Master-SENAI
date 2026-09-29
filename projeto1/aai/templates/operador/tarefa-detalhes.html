@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}Detalhe da Tarefa{% endblock %}
+{% block body %}
+<main class="container">
+    <section class="panel">
+        {% if not tarefa %}
+            <h1>Tarefa não encontrada</h1>
+        {% else %}
+            <h1>Tarefa #{{ tarefa.id }}</h1>
+            <ul class="data-list">
+                <li>OP: <strong>{{ tarefa.op_codigo }}</strong></li>
+                <li>Material: {{ tarefa.material_codigo }} — {{ tarefa.material_descricao }}</li>
+                <li>Quantidade solicitada: {{ tarefa.quantidade }}</li>
+                <li>Função: {{ 'Operador de empilhadeira' if tarefa.papel == 'empilhadeira' else 'Separador' }}</li>
+                {% if tarefa.pallet_op_id %}<li>Pallet da OP: #{{ tarefa.pallet_op_id }} ({{ tarefa.pallet_op_status }}) — {{ tarefa.pallet_op_quantidade }} / {{ tarefa.pallet_op_capacidade }}</li>{% endif %}
+                <li>Prioridade: {{ tarefa.prioridade }}</li>
+                <li>Status: {{ tarefa.status }}</li>
+                <li>Lote recomendado (FIFO): {{ tarefa.lote_codigo or '—' }}</li>
+                <li>Pallet: {{ tarefa.pallet_codigo or '—' }}</li>
+                <li>Posição: {{ tarefa.posicao_codigo or '—' }}</li>
+            </ul>
+
+            {% if tarefa.papel == 'empilhadeira' %}
+                <form id="form-movimentar-pallet" data-id="{{ tarefa.id }}" class="form-card">
+                    <label>Posição de destino (ID)<input name="posicao_destino_id" type="number" min="1" required></label>
+                    <button class="button secondary" type="button" id="btn-iniciar">Iniciar movimentação</button>
+                    <button class="button" type="submit">Registrar pallet movimentado</button>
+                    <p class="message" id="msg-execucao"></p>
+                </form>
+            {% else %}
+                <h2>Plano individual de pallets</h2>
+                <p class="muted">Sacarias fechadas ficam na base; pesagens ficam por cima. Pallet parcial permanece em montagem com o separador.</p>
+                <div id="pallets-separacao" data-op="{{ tarefa.op_id }}" data-item="{{ tarefa.item_id }}"></div>
+                <form id="form-execucao" data-id="{{ tarefa.id }}" data-item="{{ tarefa.item_id }}" data-op="{{ tarefa.op_id }}" class="form-card">
+                    <label>Pallet de estoque (ID), se aplicável<input name="pallet_id" type="number"></label>
+                    <label>Posição (ID)<input name="posicao_id" type="number"></label>
+                    <label>Quantidade retirada<input name="quantidade_retirada" type="number" step="any" required></label>
+                    <label>Observação<input name="observacao" maxlength="500"></label>
+                    <button class="button secondary" type="button" id="btn-iniciar">Iniciar separação</button>
+                    <button class="button" type="submit">Concluir separação</button>
+                    <p class="message" id="msg-execucao"></p>
+                </form>
+            {% endif %}
+
+            <a class="button secondary" href="{{ url_for('operador_excecao') }}">Solicitar exceção</a>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/operador.js') }}"></script>{% endblock %}

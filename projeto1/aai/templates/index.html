@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="container">
+    <section class="hero">
+        <img class="banner" src="{{ url_for('static', filename='images/banner_smartcolector.jpg') }}" alt="Banner Smart Collector">
+        <p class="eyebrow">Almoxarifado Assistido por IA</p>
+        <h1>AAI — Cristal Master</h1>
+        <p>Flask, SQLite3, Pydantic, HTML, CSS e JavaScript.</p>
+        <div class="actions">
+            <a class="button" href="{{ url_for('lider_dashboard') }}">Painel do líder</a>
+            <a class="button secondary" href="{{ url_for('operador_acesso') }}">Painel do operador</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

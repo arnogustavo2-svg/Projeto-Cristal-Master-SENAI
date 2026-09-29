@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Ordens de Produção — Líder{% endblock %}
+{% block body %}
+<div class="leader-layout">
+    {% include "lider/_sidebar.html" %}
+    <main class="content">
+        <h1>Ordens de Produção</h1>
+        <h2>Nova demanda simulada</h2>
+        <form id="form-gemini" class="form-card">
+            <label>Interpretar foto ou PDF da OP<input name="arquivo" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></label>
+            <section id="previsualizacao-documento" hidden aria-live="polite">
+                <p id="nome-documento-selecionado"></p>
+                <img id="previa-imagem-documento" alt="Prévia local do documento" hidden>
+                <iframe id="previa-pdf-documento" title="Prévia local do PDF" hidden></iframe>
+            </section>
+            <button class="button secondary" type="submit">Interpretar para revisão</button>
+            <p class="message" id="msg-gemini"></p>
+        </form>
+        <section id="resultado-gemini" class="table-card" aria-live="polite" hidden>
+            <h2>Revisão da interpretação</h2>
+            <p id="resumo-alertas-gemini"></p>
+            <h3>Campos ausentes</h3>
+            <ul id="campos-ausentes-gemini" class="data-list"></ul>
+            <h3>Alertas de cadastro</h3>
+            <ul id="alertas-gemini" class="data-list"></ul>
+        </section>
+        <form id="form-demanda" class="form-card">
+            <label>Código da demanda<input name="codigo" required maxlength="50"></label>
+            <label>Produto<input name="produto" required maxlength="200"></label>
+            <label>Número de cargas<input name="quantidade_cargas" type="number" min="1" step="1" required></label>
+            <label>Observação geral<textarea name="observacao" maxlength="1000"></textarea></label>
+            <fieldset>
+                <legend>Materiais solicitados</legend>
+                <div id="itens-demanda"></div>
+                <button type="button" class="button secondary" id="add-item-demanda">Adicionar material</button>
+            </fieldset>
+            <button class="button" type="submit">Salvar rascunho para revisão</button>
+            <p class="message" id="msg-demanda"></p>
+        </form>
+        <section id="revisao-demanda" class="table-card" hidden>
+            <h2>Revisão da demanda</h2>
+            <div id="resumo-demanda"></div>
+            <div class="actions">
+                <button type="button" class="button secondary" id="editar-demanda">Voltar à edição</button>
+                <button type="button" class="button" id="confirmar-demanda">Confirmar e gerar OP/tarefas</button>
+            </div>
+            <p class="message" id="msg-revisao"></p>
+        </section>
+        <h2>Demandas</h2>
+        <table class="tabela">
+            <thead><tr><th>Código</th><th>Produto</th><th>Cargas</th><th>Status</th><th>OP</th><th></th></tr></thead>
+            <tbody id="tabela-demandas"></tbody>
+        </table>
+
+        <h2>Ordens cadastradas</h2>
+        <table class="tabela">
+            <thead><tr><th>ID</th><th>Código</th><th>Produto</th><th>Prioridade</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tabela-ordens"></tbody>
+        </table>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lider.js') }}"></script>{% endblock %}

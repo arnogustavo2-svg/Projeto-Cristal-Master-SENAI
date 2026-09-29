@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Materiais — Líder{% endblock %}
+{% block body %}
+<div class="leader-layout">
+    {% include "lider/_sidebar.html" %}
+    <main class="content">
+        <h1>Materiais</h1>
+        <form id="form-material" class="form-card">
+            <label>Código<input name="codigo" required maxlength="50"></label>
+            <label>Descrição<input name="descricao" required maxlength="200"></label>
+            <label>Unidade<input name="unidade" required maxlength="20"></label>
+            <button class="button" type="submit">Cadastrar</button>
+            <p class="message" id="msg-material"></p>
+        </form>
+        <div class="table-card">
+            <input id="busca-material" placeholder="Pesquisar por código ou descrição">
+            <button class="button secondary" id="refresh-materiais">Atualizar</button>
+            <table class="tabela">
+                <thead><tr><th>Código</th><th>Descrição</th><th>Unidade</th><th>Ativo</th><th>Ações</th></tr></thead>
+                <tbody id="tabela-materiais"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lider.js') }}"></script>{% endblock %}

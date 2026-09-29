@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Início do Operador{% endblock %}
+{% block body %}
+<main class="container">
+    <section class="panel">
+        <p class="eyebrow">Operador</p>
+        <h1 id="saudacao">Olá</h1>
+        <p class="muted">Matrícula: <span id="matricula-operador"></span></p>
+        <div class="cards">
+            <div class="card"><span id="cont-pendentes">0</span><small>Pendentes</small></div>
+            <div class="card"><span id="cont-andamento">0</span><small>Em andamento</small></div>
+            <div class="card"><span id="cont-disponiveis">0</span><small>Disponíveis</small></div>
+        </div>
+        <div class="actions">
+            <a class="button" href="{{ url_for('operador_tarefas') }}">Minhas tarefas</a>
+            <a class="button secondary" href="{{ url_for('operador_excecao') }}">Registrar exceção</a>
+            <button class="button secondary" id="btn-sair">Sair</button>
+        </div>
+        <h2>Alertas da operação</h2>
+        <ul id="alertas-operacao" class="data-list"></ul>
+    </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/operador.js') }}"></script>{% endblock %}

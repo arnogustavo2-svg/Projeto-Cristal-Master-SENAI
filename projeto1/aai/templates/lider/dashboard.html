@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard — Líder{% endblock %}
+{% block body %}
+<div class="leader-layout">
+    {% include "lider/_sidebar.html" %}
+    <main class="content">
+        <h1>Dashboard</h1>
+        <p class="muted">Atualização automática a cada 5 segundos.</p>
+        <div id="dashboard-cards" class="cards"></div>
+        <h2>Movimentações recentes</h2>
+        <ul id="dashboard-movs" class="data-list"></ul>
+        <h2>Exceções abertas</h2>
+        <p id="dashboard-excecoes">—</p>
+        <h2>Alertas de estoque</h2>
+        <ul id="dashboard-alertas" class="data-list"></ul>
+        <h2>Eventos recentes de dispositivos</h2>
+        <ul id="dashboard-eventos" class="data-list"></ul>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lider.js') }}"></script>{% endblock %}

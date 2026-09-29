@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Tarefas — Líder{% endblock %}
+{% block body %}
+<div class="leader-layout">
+    {% include "lider/_sidebar.html" %}
+    <main class="content">
+        <h1>Tarefas</h1>
+        <div class="filtros">
+            <label>Status
+                <select id="filtro-status">
+                    <option value="">Todos</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="concluida">Concluída</option>
+                    <option value="bloqueada">Bloqueada</option>
+                    <option value="cancelada">Cancelada</option>
+                </select>
+            </label>
+            <button class="button" id="refresh-tarefas">Filtrar</button>
+        </div>
+        <table class="tabela">
+            <thead><tr><th>ID</th><th>OP</th><th>Tipo</th><th>Material</th><th>Qtd</th><th>Operador</th><th>Status</th><th>Prioridade</th></tr></thead>
+            <tbody id="tabela-tarefas"></tbody>
+        </table>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lider.js') }}"></script>{% endblock %}
